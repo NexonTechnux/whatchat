@@ -1,0 +1,11 @@
+- name: Install ngrok
+  run: |
+    sudo apt-get install ngrok
+
+- name: Start backend
+  run: |
+    node server.js &
+
+- name: Start ngrok
+  run: |
+    ngrok http 3000 > ngrok.log &

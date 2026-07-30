@@ -6,7 +6,6 @@ on:
 jobs:
   run-backend:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,10 +30,8 @@ jobs:
           sleep 5
 
       - name: Start ngrok tunnel
-        env:
-          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
         run: |
-          ngrok config add-authtoken "$NGROK_AUTHTOKEN"
+          ngrok config add-authtoken "3HEah90kjjyMDXbYMiPSfM4lnyY_5zvyJaUkySVhjFsXdq6ch"
           ngrok http 3000 --log=stdout > ngrok.log &
           sleep 5
 

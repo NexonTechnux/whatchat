@@ -1,11 +1,44 @@
-- name: Install ngrok
-  run: |
-    sudo apt-get install ngrok
+name: Whatchat Backend with Ngrok
 
-- name: Start backend
-  run: |
-    node server.js &
+on:
+  workflow_dispatch:
 
-- name: Start ngrok
-  run: |
-    ngrok http 3000 > ngrok.log &
+jobs:
+  run-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install ngrok
+        run: |
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update
+          sudo apt install ngrok
+
+      - name: Start backend
+        run: |
+          cd backend
+          npm install
+          node server.js &
+          sleep 3
+
+      - name: Start ngrok tunnel
+        env:
+          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+        run: |
+          ngrok config add-authtoken "$NGROK_AUTHTOKEN"
+          ngrok http 3000 > ngrok.log &
+          sleep 5
+          echo "Ngrok tunnel started"
+
+      - name: Show ngrok public URL
+        run: |
+          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url'
